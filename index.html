@@ -22,6 +22,43 @@
     .hero-float-1 { top: 10%; left: -10%; }
     .hero-float-2 { bottom: 20%; right: -5%; }
     .hero-float-3 { top: 50%; left: -15%; }
+
+    /* HUMAN FIGURE ANIMATIONS */
+    @keyframes liftBar {
+      0%,100% { transform: translateY(0px); }
+      50% { transform: translateY(-18px); }
+    }
+    @keyframes armUp {
+      0%,100% { transform: rotate(30deg); transform-origin: 50% 0%; }
+      50% { transform: rotate(-30deg); transform-origin: 50% 0%; }
+    }
+    @keyframes armDown {
+      0%,100% { transform: rotate(-30deg); transform-origin: 50% 0%; }
+      50% { transform: rotate(30deg); transform-origin: 50% 0%; }
+    }
+    @keyframes squat {
+      0%,100% { transform: translateY(0px); }
+      50% { transform: translateY(12px); }
+    }
+    @keyframes headBob {
+      0%,100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    @keyframes legSwing {
+      0%,100% { transform: rotate(0deg); transform-origin: top center; }
+      50% { transform: rotate(20deg); transform-origin: top center; }
+    }
+    @keyframes glowPulse {
+      0%,100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+    .figure-wrap { position: relative; width: 280px; height: 320px; display: flex; align-items: center; justify-content: center; }
+    .figure-glow { position: absolute; width: 220px; height: 220px; background: radial-gradient(circle, rgba(232,255,71,0.15) 0%, transparent 70%); border-radius: 50%; animation: glowPulse 2s infinite; }
+    .lifter-body { animation: squat 1.8s ease-in-out infinite; }
+    .lifter-bar { animation: liftBar 1.8s ease-in-out infinite; }
+    .lifter-head { animation: headBob 1.8s ease-in-out infinite; }
+    .lifter-arm-l { animation: armUp 1.8s ease-in-out infinite; transform-origin: 50px 100px; }
+    .lifter-arm-r { animation: armDown 1.8s ease-in-out infinite; transform-origin: 130px 100px; }
     .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
     .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: all var(--transition); }
     .feature-card:hover { border-color: var(--accent); transform: translateY(-4px); }
@@ -77,7 +114,83 @@
           </div>
         </div>
         <div class="hero-visual">
-          <div class="hero-emoji-main">🏋️</div>
+          <div class="figure-wrap">
+            <div class="figure-glow"></div>
+            <!-- Animated Human Lifting SVG -->
+            <svg width="280" height="320" viewBox="0 0 280 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- GLOW SHADOW -->
+              <ellipse cx="140" cy="300" rx="60" ry="10" fill="rgba(232,255,71,0.15)"/>
+
+              <!-- BARBELL (animated up/down) -->
+              <g class="lifter-bar">
+                <rect x="40" y="95" width="200" height="8" rx="4" fill="#e8ff47"/>
+                <rect x="28" y="82" width="24" height="34" rx="6" fill="#e8ff47" opacity="0.8"/>
+                <rect x="228" y="82" width="24" height="34" rx="6" fill="#e8ff47" opacity="0.8"/>
+                <rect x="20" y="88" width="12" height="22" rx="4" fill="#e8ff47" opacity="0.5"/>
+                <rect x="248" y="88" width="12" height="22" rx="4" fill="#e8ff47" opacity="0.5"/>
+              </g>
+
+              <!-- BODY GROUP (squats slightly) -->
+              <g class="lifter-body">
+                <!-- HEAD -->
+                <g class="lifter-head">
+                  <circle cx="140" cy="148" r="22" fill="#f0d0a0" stroke="#e8ff47" stroke-width="2"/>
+                  <!-- eyes -->
+                  <circle cx="133" cy="145" r="3" fill="#333"/>
+                  <circle cx="147" cy="145" r="3" fill="#333"/>
+                  <!-- smile -->
+                  <path d="M133 154 Q140 160 147 154" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  <!-- hair -->
+                  <path d="M118 140 Q140 120 162 140" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/>
+                </g>
+
+                <!-- NECK -->
+                <rect x="134" y="168" width="12" height="14" rx="4" fill="#f0d0a0"/>
+
+                <!-- TORSO -->
+                <rect x="108" y="180" width="64" height="72" rx="12" fill="#3b82f6"/>
+                <!-- shirt detail -->
+                <path d="M120 195 L140 208 L160 195" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
+
+                <!-- LEFT ARM -->
+                <g class="lifter-arm-l">
+                  <line x1="108" y1="188" x2="60" y2="140" stroke="#f0d0a0" stroke-width="12" stroke-linecap="round"/>
+                  <circle cx="60" cy="138" r="8" fill="#f0d0a0"/>
+                </g>
+
+                <!-- RIGHT ARM -->
+                <g class="lifter-arm-r">
+                  <line x1="172" y1="188" x2="220" y2="140" stroke="#f0d0a0" stroke-width="12" stroke-linecap="round"/>
+                  <circle cx="220" cy="138" r="8" fill="#f0d0a0"/>
+                </g>
+
+                <!-- SHORTS -->
+                <rect x="110" y="248" width="60" height="28" rx="8" fill="#1e3a5f"/>
+
+                <!-- LEFT LEG -->
+                <line x1="122" y1="274" x2="112" y2="310" stroke="#f0d0a0" stroke-width="12" stroke-linecap="round"/>
+                <rect x="100" y="304" width="28" height="12" rx="6" fill="#333"/>
+
+                <!-- RIGHT LEG -->
+                <line x1="158" y1="274" x2="168" y2="310" stroke="#f0d0a0" stroke-width="12" stroke-linecap="round"/>
+                <rect x="152" y="304" width="28" height="12" rx="6" fill="#333"/>
+              </g>
+
+              <!-- SWEAT DROPS -->
+              <g opacity="0.6">
+                <ellipse cx="170" cy="155" rx="3" ry="5" fill="#7ec8e3" transform="rotate(-15 170 155)"/>
+                <ellipse cx="178" cy="162" rx="2" ry="4" fill="#7ec8e3" transform="rotate(-10 178 162)"/>
+              </g>
+
+              <!-- EFFORT LINES -->
+              <g stroke="#e8ff47" stroke-width="2" opacity="0.4" stroke-linecap="round">
+                <line x1="58" y1="112" x2="48" y2="100"/>
+                <line x1="54" y1="118" x2="40" y2="114"/>
+                <line x1="222" y1="112" x2="232" y2="100"/>
+                <line x1="226" y1="118" x2="240" y2="114"/>
+              </g>
+            </svg>
+          </div>
           <div class="hero-floating hero-float-1"><span>🔥</span> 450 cal burned</div>
           <div class="hero-floating hero-float-2"><span>⚡</span> 7-day streak!</div>
           <div class="hero-floating hero-float-3"><span>✅</span> Workout done</div>
