@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exercises — FitAtHome</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .ex-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+    .ex-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; cursor:pointer; transition:all var(--transition); }
+    .ex-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .ex-card-icon { font-size:40px; margin-bottom:10px; }
+    .ex-card-name { font-size:16px; font-weight:700; margin-bottom:4px; }
+    .ex-card-muscle { font-size:12px; color:var(--text2); margin-bottom:10px; }
+    .ex-card-tags { display:flex; gap:6px; flex-wrap:wrap; }
+    .filter-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
+    .modal-body-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+    .modal-info-item { background:var(--bg3); border-radius:var(--radius-sm); padding:12px; }
+    .modal-info-label { font-size:11px; color:var(--text2); margin-bottom:4px; }
+    .modal-info-val { font-size:14px; font-weight:600; }
+    .tip-list { list-style:disc; padding-left:20px; }
+    .tip-list li { font-size:13px; color:var(--text2); margin-bottom:6px; line-height:1.5; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-logo">F</div><span>FitAtHome</span></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="workouts.html">Workouts</a>
+      <a href="exercises.html" class="active">Exercises</a>
+      <a href="progress.html">Progress</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <div class="nav-actions"><button class="theme-btn" onclick="toggleTheme()">🌙</button></div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container section-sm">
+      <div class="page-title">Exercise Library</div>
+      <div class="page-sub">Browse 200+ exercises with instructions and tips</div>
+
+      <div class="filter-row">
+        <div class="search-wrap" style="flex:1;min-width:200px">
+          <span class="search-icon">🔍</span>
+          <input class="input" id="ex-search" placeholder="Search exercises..." oninput="filterEx()" />
+        </div>
+        <select class="select" style="width:auto" id="muscle-filter" onchange="filterEx()">
+          <option value="all">All Muscles</option>
+          <option value="chest">Chest</option>
+          <option value="back">Back</option>
+          <option value="arms">Arms</option>
+          <option value="shoulders">Shoulders</option>
+          <option value="core">Core</option>
+          <option value="legs">Legs</option>
+          <option value="glutes">Glutes</option>
+          <option value="cardio">Cardio</option>
+        </select>
+        <select class="select" style="width:auto" id="diff-filter" onchange="filterEx()">
+          <option value="all">All Levels</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+        <select class="select" style="width:auto" id="equip-filter" onchange="filterEx()">
+          <option value="all">All Equipment</option>
+          <option value="none">No Equipment</option>
+          <option value="dumbbells">Dumbbells</option>
+          <option value="bands">Resistance Bands</option>
+        </select>
+      </div>
+
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px" id="ex-count"></div>
+      <div class="ex-grid" id="ex-grid"></div>
+    </div>
+  </div>
+
+  <!-- EXERCISE MODAL -->
+  <div class="modal-overlay" id="ex-modal" onclick="closeModal(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:36px" id="m-icon"></div>
+          <div>
+            <h3 id="m-name"></h3>
+            <div style="font-size:13px;color:var(--text2)" id="m-muscle"></div>
+          </div>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('ex-modal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body-grid">
+        <div class="modal-info-item"><div class="modal-info-label">Difficulty</div><div class="modal-info-val" id="m-diff"></div></div>
+        <div class="modal-info-item"><div class="modal-info-label">Equipment</div><div class="modal-info-val" id="m-equip"></div></div>
+        <div class="modal-info-item"><div class="modal-info-label">Duration / Reps</div><div class="modal-info-val" id="m-reps"></div></div>
+        <div class="modal-info-item"><div class="modal-info-label">Calories / min</div><div class="modal-info-val" id="m-cal"></div></div>
+      </div>
+      <h4 style="margin-bottom:8px">How to do it</h4>
+      <p style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:16px" id="m-instructions"></p>
+      <h4 style="margin-bottom:8px">Benefits</h4>
+      <p style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:16px" id="m-benefits"></p>
+      <h4 style="margin-bottom:8px">Tips for proper form</h4>
+      <ul class="tip-list" id="m-tips"></ul>
+      <h4 style="margin-bottom:8px;margin-top:16px">Common mistakes</h4>
+      <ul class="tip-list" id="m-mistakes"></ul>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="bnav-icon">🏠</span>Home</a>
+    <a href="workouts.html"><span class="bnav-icon">💪</span>Workouts</a>
+    <a href="exercises.html" class="active"><span class="bnav-icon">📚</span>Exercises</a>
+    <a href="progress.html"><span class="bnav-icon">📈</span>Progress</a>
+    <a href="profile.html"><span class="bnav-icon">👤</span>Profile</a>
+  </nav>
+
+  <div id="toast"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    function filterEx() {
+      const q = document.getElementById('ex-search').value.toLowerCase();
+      const muscle = document.getElementById('muscle-filter').value;
+      const diff = document.getElementById('diff-filter').value;
+      const equip = document.getElementById('equip-filter').value;
+      const list = EXERCISES.filter(e =>
+        (muscle === 'all' || e.muscle === muscle) &&
+        (diff === 'all' || e.difficulty === diff) &&
+        (equip === 'all' || e.equipment === equip) &&
+        (e.name.toLowerCase().includes(q) || e.muscle.toLowerCase().includes(q))
+      );
+      document.getElementById('ex-count').textContent = `${list.length} exercises found`;
+      const diffMap = { beginner:'badge-green', intermediate:'badge-yellow', advanced:'badge-red' };
+      document.getElementById('ex-grid').innerHTML = list.map(e => `
+        <div class="ex-card fade-in" onclick="openExercise(${e.id})">
+          <div class="ex-card-icon">${e.icon}</div>
+          <div class="ex-card-name">${e.name}</div>
+          <div class="ex-card-muscle">${e.muscle}</div>
+          <div class="ex-card-tags">
+            <span class="badge ${diffMap[e.difficulty]||'badge-blue'}">${e.difficulty}</span>
+            <span class="tag">${e.equipment}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openExercise(id) {
+      const e = EXERCISES.find(x => x.id === id);
+      if (!e) return;
+      document.getElementById('m-icon').textContent = e.icon;
+      document.getElementById('m-name').textContent = e.name;
+      document.getElementById('m-muscle').textContent = e.muscle;
+      document.getElementById('m-diff').textContent = e.difficulty;
+      document.getElementById('m-equip').textContent = e.equipment;
+      document.getElementById('m-reps').textContent = e.reps;
+      document.getElementById('m-cal').textContent = e.calPerMin + ' cal';
+      document.getElementById('m-instructions').textContent = e.instructions;
+      document.getElementById('m-benefits').textContent = e.benefits;
+      document.getElementById('m-tips').innerHTML = e.tips.map(t => `<li>${t}</li>`).join('');
+      document.getElementById('m-mistakes').innerHTML = e.mistakes.map(m => `<li>${m}</li>`).join('');
+      document.getElementById('ex-modal').classList.add('open');
+    }
+
+    function closeModal(e) { if (e.target === document.getElementById('ex-modal')) document.getElementById('ex-modal').classList.remove('open'); }
+
+    filterEx();
+  </script>
+</body>
+</html>

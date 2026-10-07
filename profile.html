@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile — FitAtHome</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .profile-header { display:flex; align-items:center; gap:24px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:28px; margin-bottom:28px; flex-wrap:wrap; }
+    .avatar { width:80px; height:80px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; color:#000; flex-shrink:0; cursor:pointer; position:relative; }
+    .avatar-change { position:absolute; bottom:0; right:0; width:24px; height:24px; background:var(--bg2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; border:1px solid var(--border); }
+    .profile-info { flex:1; min-width:200px; }
+    .profile-name { font-size:24px; font-weight:800; }
+    .profile-sub { color:var(--text2); font-size:14px; margin-top:4px; }
+    .profile-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .edit-form { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:28px; margin-bottom:28px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .achievements-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px; }
+    .ach-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center; transition:all var(--transition); }
+    .ach-card.unlocked { border-color:var(--accent); background:rgba(232,255,71,0.05); }
+    .ach-card.locked { opacity:0.4; filter:grayscale(1); }
+    .ach-icon { font-size:32px; margin-bottom:8px; }
+    .ach-name { font-size:13px; font-weight:700; }
+    .ach-desc { font-size:11px; color:var(--text2); margin-top:4px; }
+    .ach-date { font-size:11px; color:var(--accent); margin-top:4px; }
+    @media(max-width:600px){ .form-row{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-logo">F</div><span>FitAtHome</span></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="workouts.html">Workouts</a>
+      <a href="exercises.html">Exercises</a><a href="progress.html">Progress</a><a href="profile.html" class="active">Profile</a>
+    </div>
+    <div class="nav-actions"><button class="theme-btn" onclick="toggleTheme()">🌙</button></div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container section-sm">
+      <div class="page-title">My Profile 👤</div>
+
+      <!-- PROFILE HEADER -->
+      <div class="profile-header fade-in">
+        <div class="avatar" id="avatar-display">
+          <span id="avatar-initials">?</span>
+          <div class="avatar-change">✏️</div>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name" id="profile-name-display">Your Name</div>
+          <div class="profile-sub" id="profile-sub-display">Set up your profile below</div>
+          <div class="profile-badges">
+            <span class="badge badge-accent" id="level-badge">Beginner</span>
+            <span class="badge badge-blue" id="goal-badge">Get Fitter</span>
+            <span class="badge badge-green" id="streak-badge-profile">🔥 0 day streak</span>
+          </div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:32px;font-weight:900;color:var(--accent)" id="p-total-workouts">0</div>
+          <div style="font-size:12px;color:var(--text2)">Workouts</div>
+        </div>
+      </div>
+
+      <!-- EDIT FORM -->
+      <div class="edit-form fade-in">
+        <h3 style="margin-bottom:20px">Edit Profile</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="label">Your Name</label>
+            <input class="input" id="inp-name" placeholder="e.g. Nurullah" />
+          </div>
+          <div class="form-group">
+            <label class="label">Age</label>
+            <input class="input" type="number" id="inp-age" placeholder="e.g. 22" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="label">Fitness Level</label>
+            <select class="select" id="inp-level">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label">Main Goal</label>
+            <select class="select" id="inp-goal">
+              <option value="Lose Weight">Lose Weight</option>
+              <option value="Build Muscle">Build Muscle</option>
+              <option value="Get Fitter">Get Fitter</option>
+              <option value="Flexibility">Flexibility</option>
+              <option value="Get Stronger">Get Stronger</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="label">Preferred Duration</label>
+            <select class="select" id="inp-duration">
+              <option value="10">10 minutes</option>
+              <option value="20">20 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label">Equipment</label>
+            <select class="select" id="inp-equip">
+              <option value="none">No Equipment</option>
+              <option value="dumbbells">Dumbbells</option>
+              <option value="bands">Resistance Bands</option>
+              <option value="full">Full Setup</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn btn-accent" onclick="saveProfile()">💾 Save Profile</button>
+          <button class="btn btn-danger btn-sm" onclick="resetData()">🗑️ Reset All Data</button>
+        </div>
+      </div>
+
+      <!-- ACHIEVEMENTS -->
+      <div class="card fade-in">
+        <div class="section-header">
+          <h3>Achievements 🏆</h3>
+          <span style="font-size:13px;color:var(--text2)" id="ach-count">0 unlocked</span>
+        </div>
+        <div class="achievements-grid" id="ach-grid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="bnav-icon">🏠</span>Home</a>
+    <a href="workouts.html"><span class="bnav-icon">💪</span>Workouts</a>
+    <a href="exercises.html"><span class="bnav-icon">📚</span>Exercises</a>
+    <a href="progress.html"><span class="bnav-icon">📈</span>Progress</a>
+    <a href="profile.html" class="active"><span class="bnav-icon">👤</span>Profile</a>
+  </nav>
+
+  <div id="toast"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    function initProfile() {
+      const d = getAppData();
+      const p = d.profile;
+      document.getElementById('inp-name').value = p.name || '';
+      document.getElementById('inp-age').value = p.age || '';
+      document.getElementById('inp-level').value = p.level || 'beginner';
+      document.getElementById('inp-goal').value = p.goal || 'Get Fitter';
+      document.getElementById('inp-duration').value = p.duration || '30';
+      document.getElementById('inp-equip').value = p.equipment || 'none';
+      document.getElementById('profile-name-display').textContent = p.name || 'Your Name';
+      document.getElementById('profile-sub-display').textContent = (p.level || 'Beginner') + ' · ' + (p.goal || 'Get Fitter');
+      document.getElementById('avatar-initials').textContent = p.name ? p.name.charAt(0).toUpperCase() : '?';
+      document.getElementById('level-badge').textContent = p.level || 'Beginner';
+      document.getElementById('goal-badge').textContent = p.goal || 'Get Fitter';
+      document.getElementById('streak-badge-profile').textContent = `🔥 ${d.stats.streak} day streak`;
+      document.getElementById('p-total-workouts').textContent = d.stats.totalWorkouts;
+      // Achievements
+      const unlocked = d.achievements.filter(a => a.unlocked).length;
+      document.getElementById('ach-count').textContent = `${unlocked} / ${d.achievements.length} unlocked`;
+      document.getElementById('ach-grid').innerHTML = d.achievements.map(a => `
+        <div class="ach-card ${a.unlocked ? 'unlocked' : 'locked'}">
+          <div class="ach-icon">${a.icon}</div>
+          <div class="ach-name">${a.name}</div>
+          <div class="ach-desc">${a.description}</div>
+          ${a.unlocked ? `<div class="ach-date">✓ Unlocked</div>` : '<div class="ach-date" style="color:var(--text3)">Locked 🔒</div>'}
+        </div>
+      `).join('');
+    }
+
+    function saveProfile() {
+      const d = getAppData();
+      d.profile.name = document.getElementById('inp-name').value;
+      d.profile.age = document.getElementById('inp-age').value;
+      d.profile.level = document.getElementById('inp-level').value;
+      d.profile.goal = document.getElementById('inp-goal').value;
+      d.profile.duration = document.getElementById('inp-duration').value;
+      d.profile.equipment = document.getElementById('inp-equip').value;
+      saveAppData(d);
+      showToast('Profile saved! ✅');
+      initProfile();
+    }
+
+    function resetData() {
+      if (confirm('This will delete ALL your progress. Are you sure?')) {
+        localStorage.removeItem('fitathome_data');
+        showToast('Data reset');
+        setTimeout(() => initProfile(), 500);
+      }
+    }
+
+    initProfile();
+  </script>
+</body>
+</html>

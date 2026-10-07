@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Progress — FitAtHome</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .progress-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+    .streak-card { background:linear-gradient(135deg,rgba(232,255,71,0.1),rgba(255,107,53,0.1)); border:1px solid rgba(232,255,71,0.3); }
+    .chart-section { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; }
+    .chart-title { font-size:16px; font-weight:700; margin-bottom:20px; }
+    .week-chart { display:flex; align-items:flex-end; gap:12px; height:120px; }
+    .bar-col { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
+    .bar { width:100%; border-radius:6px 6px 0 0; background:var(--accent); transition:height 0.6s ease; min-height:4px; }
+    .bar.empty { background:var(--bg3); }
+    .bar-label { font-size:11px; color:var(--text3); }
+    .bar-val { font-size:11px; color:var(--text2); }
+    .records-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
+    .record-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; }
+    .record-icon { font-size:28px; margin-bottom:8px; }
+    .record-val { font-size:24px; font-weight:800; color:var(--accent); }
+    .record-label { font-size:12px; color:var(--text2); margin-top:4px; }
+    .history-list { display:flex; flex-direction:column; gap:10px; }
+    .history-item { display:flex; align-items:center; gap:14px; padding:14px; background:var(--bg3); border-radius:var(--radius-sm); }
+    @media(max-width:768px){ .progress-stats{grid-template-columns:repeat(2,1fr);} }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-logo">F</div><span>FitAtHome</span></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="workouts.html">Workouts</a>
+      <a href="exercises.html">Exercises</a><a href="progress.html" class="active">Progress</a><a href="profile.html">Profile</a>
+    </div>
+    <div class="nav-actions"><button class="theme-btn" onclick="toggleTheme()">🌙</button></div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container section-sm">
+      <div class="page-title">My Progress 📈</div>
+      <div class="page-sub">Track your fitness journey over time</div>
+
+      <!-- STATS -->
+      <div class="progress-stats fade-in">
+        <div class="stat-card streak-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-label">Current Streak</div>
+          <div class="stat-value" id="p-streak">0</div>
+          <div class="stat-sub">days</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-label">Longest Streak</div>
+          <div class="stat-value" id="p-longest">0</div>
+          <div class="stat-sub">days</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💪</div>
+          <div class="stat-label">Total Workouts</div>
+          <div class="stat-value" id="p-total">0</div>
+          <div class="stat-sub">completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-label">Hours Trained</div>
+          <div class="stat-value" id="p-hours">0</div>
+          <div class="stat-sub">total hours</div>
+        </div>
+      </div>
+
+      <!-- WEEKLY CHART -->
+      <div class="chart-section fade-in">
+        <div class="chart-title">This Week's Activity</div>
+        <div class="week-chart" id="week-chart"></div>
+      </div>
+
+      <!-- CALORIE CHART -->
+      <div class="chart-section fade-in">
+        <div class="chart-title">Calories Burned (Last 7 Days)</div>
+        <div class="week-chart" id="cal-chart"></div>
+      </div>
+
+      <!-- CIRCULAR STATS -->
+      <div class="grid-3 fade-in" style="margin-bottom:24px">
+        <div class="card" style="text-align:center">
+          <div class="circle-wrap" style="margin:0 auto 12px">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle class="circle-bg" cx="50" cy="50" r="40" stroke-width="8"/>
+              <circle class="circle-fill" cx="50" cy="50" r="40" stroke-width="8" stroke-dasharray="251" id="c-workouts" stroke-dashoffset="251"/>
+            </svg>
+            <div class="circle-text"><div class="value" id="cv-workouts">0%</div><div class="unit">goal</div></div>
+          </div>
+          <div style="font-weight:600">Weekly Goal</div>
+          <div style="font-size:12px;color:var(--text2)"><span id="c-done">0</span>/5 workouts</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="circle-wrap" style="margin:0 auto 12px">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle class="circle-bg" cx="50" cy="50" r="40" stroke-width="8"/>
+              <circle class="circle-fill" cx="50" cy="50" r="40" stroke-width="8" stroke-dasharray="251" id="c-cal" stroke-dashoffset="251"/>
+            </svg>
+            <div class="circle-text"><div class="value" id="cv-cal">0</div><div class="unit">cal</div></div>
+          </div>
+          <div style="font-weight:600">Today's Calories</div>
+          <div style="font-size:12px;color:var(--text2)">Target: 300 cal</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="circle-wrap" style="margin:0 auto 12px">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle class="circle-bg" cx="50" cy="50" r="40" stroke-width="8"/>
+              <circle class="circle-fill" cx="50" cy="50" r="40" stroke-width="8" stroke-dasharray="251" id="c-time" stroke-dashoffset="251"/>
+            </svg>
+            <div class="circle-text"><div class="value" id="cv-time">0</div><div class="unit">min</div></div>
+          </div>
+          <div style="font-weight:600">Today's Time</div>
+          <div style="font-size:12px;color:var(--text2)">Target: 30 min</div>
+        </div>
+      </div>
+
+      <!-- PERSONAL RECORDS -->
+      <div class="card fade-in" style="margin-bottom:24px">
+        <h3 style="margin-bottom:20px">Personal Records 🏅</h3>
+        <div class="records-grid">
+          <div class="record-card"><div class="record-icon">🔥</div><div class="record-val" id="r-cal">0</div><div class="record-label">Most calories in one session</div></div>
+          <div class="record-card"><div class="record-icon">⏱️</div><div class="record-val" id="r-time">0</div><div class="record-label">Longest workout (min)</div></div>
+          <div class="record-card"><div class="record-icon">📅</div><div class="record-val" id="r-streak">0</div><div class="record-label">Longest streak (days)</div></div>
+          <div class="record-card"><div class="record-icon">💪</div><div class="record-val" id="r-week">0</div><div class="record-label">Best week (workouts)</div></div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="card fade-in">
+        <div class="section-header"><h3>Workout History</h3><span style="font-size:13px;color:var(--text2)" id="history-count">0 workouts</span></div>
+        <div class="history-list" id="history-list">
+          <div style="text-align:center;padding:32px;color:var(--text3)"><div style="font-size:40px">📋</div><p style="margin-top:8px">No workouts yet</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="bnav-icon">🏠</span>Home</a>
+    <a href="workouts.html"><span class="bnav-icon">💪</span>Workouts</a>
+    <a href="exercises.html"><span class="bnav-icon">📚</span>Exercises</a>
+    <a href="progress.html" class="active"><span class="bnav-icon">📈</span>Progress</a>
+    <a href="profile.html"><span class="bnav-icon">👤</span>Profile</a>
+  </nav>
+
+  <div id="toast"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    function initProgress() {
+      const d = getAppData();
+      document.getElementById('p-streak').textContent = d.stats.streak;
+      document.getElementById('p-longest').textContent = d.stats.longestStreak || d.stats.streak;
+      document.getElementById('p-total').textContent = d.stats.totalWorkouts;
+      document.getElementById('p-hours').textContent = Math.floor(d.stats.totalMinutes / 60);
+      // Records
+      document.getElementById('r-cal').textContent = d.stats.bestCalories || 0;
+      document.getElementById('r-time').textContent = d.stats.bestDuration || 0;
+      document.getElementById('r-streak').textContent = d.stats.longestStreak || 0;
+      document.getElementById('r-week').textContent = d.stats.bestWeek || 0;
+      // Weekly chart
+      const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      const weekData = d.weekMinutes || [0,0,0,0,0,0,0];
+      const maxMin = Math.max(...weekData, 1);
+      document.getElementById('week-chart').innerHTML = days.map((day, i) => {
+        const h = Math.round((weekData[i] / maxMin) * 100);
+        return `<div class="bar-col"><div class="bar-val">${weekData[i]}m</div><div class="bar ${weekData[i]===0?'empty':''}" style="height:${h}px"></div><div class="bar-label">${day}</div></div>`;
+      }).join('');
+      // Calorie chart
+      const calData = d.weekCalories || [0,0,0,0,0,0,0];
+      const maxCal = Math.max(...calData, 1);
+      document.getElementById('cal-chart').innerHTML = days.map((day, i) => {
+        const h = Math.round((calData[i] / maxCal) * 100);
+        return `<div class="bar-col"><div class="bar-val">${calData[i]}</div><div class="bar ${calData[i]===0?'empty':''}" style="height:${h}px;background:var(--accent2)"></div><div class="bar-label">${day}</div></div>`;
+      }).join('');
+      // Circles
+      const weekDone = d.weekActivity ? d.weekActivity.filter(Boolean).length : 0;
+      const weekPct = Math.round((weekDone / 5) * 100);
+      document.getElementById('c-done').textContent = weekDone;
+      document.getElementById('cv-workouts').textContent = weekPct + '%';
+      document.getElementById('c-workouts').style.strokeDashoffset = 251 - (251 * weekPct / 100);
+      // History
+      if (d.history.length > 0) {
+        document.getElementById('history-count').textContent = d.history.length + ' workouts';
+        document.getElementById('history-list').innerHTML = d.history.map(h => `
+          <div class="history-item">
+            <div style="font-size:28px">${h.icon || '💪'}</div>
+            <div style="flex:1"><div style="font-weight:600">${h.name}</div><div style="font-size:12px;color:var(--text2)">${h.date}</div></div>
+            <div style="text-align:right;font-size:12px;color:var(--text2)">${h.duration} min<br>${h.calories} cal</div>
+          </div>
+        `).join('');
+      }
+    }
+    initProgress();
+  </script>
+</body>
+</html>

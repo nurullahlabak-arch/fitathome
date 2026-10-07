@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workouts — FitAtHome</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .filter-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:28px; align-items:center; }
+    .filter-bar .search-wrap { flex:1; min-width:200px; }
+    .cat-pills { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+    .pill { padding:6px 16px; border-radius:99px; font-size:13px; font-weight:600; background:var(--bg3); color:var(--text2); cursor:pointer; border:1px solid var(--border); transition:all var(--transition); }
+    .pill.active { background:var(--accent); color:#000; border-color:var(--accent); }
+    .pill:hover:not(.active) { border-color:var(--accent); color:var(--accent); }
+    .workout-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
+    .wcard { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:all var(--transition); }
+    .wcard:hover { border-color:var(--accent); transform:translateY(-4px); box-shadow:var(--shadow); }
+    .wcard-img { height:150px; display:flex; align-items:center; justify-content:center; font-size:64px; background:var(--bg3); position:relative; }
+    .wcard-diff { position:absolute; top:10px; right:10px; }
+    .wcard-body { padding:16px; }
+    .wcard-title { font-size:16px; font-weight:700; margin-bottom:6px; }
+    .wcard-desc { font-size:13px; color:var(--text2); margin-bottom:12px; line-height:1.5; }
+    .wcard-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .wcard-meta span { font-size:12px; color:var(--text2); }
+    .empty-state { text-align:center; padding:60px 20px; color:var(--text3); }
+    .empty-state div { font-size:56px; margin-bottom:12px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-logo">F</div><span>FitAtHome</span></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="workouts.html" class="active">Workouts</a>
+      <a href="exercises.html">Exercises</a>
+      <a href="progress.html">Progress</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container section-sm">
+      <div style="margin-bottom:24px">
+        <div class="page-title">Workouts</div>
+        <div class="page-sub">Choose a workout and get moving</div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap" style="flex:1;min-width:200px">
+          <span class="search-icon">🔍</span>
+          <input class="input" id="workout-search" placeholder="Search workouts..." oninput="filterWorkouts()" />
+        </div>
+        <select class="select" style="width:auto" id="sort-select" onchange="filterWorkouts()">
+          <option value="all">All Durations</option>
+          <option value="short">Under 20 min</option>
+          <option value="medium">20-40 min</option>
+          <option value="long">40+ min</option>
+        </select>
+      </div>
+
+      <div class="cat-pills" id="cat-pills">
+        <div class="pill active" onclick="setCat('all',this)">All</div>
+        <div class="pill" onclick="setCat('fullbody',this)">🧍 Full Body</div>
+        <div class="pill" onclick="setCat('abs',this)">🎯 Abs & Core</div>
+        <div class="pill" onclick="setCat('chest',this)">💪 Chest</div>
+        <div class="pill" onclick="setCat('arms',this)">🦾 Arms</div>
+        <div class="pill" onclick="setCat('legs',this)">🦵 Legs</div>
+        <div class="pill" onclick="setCat('cardio',this)">🏃 Cardio</div>
+        <div class="pill" onclick="setCat('stretch',this)">🧘 Stretching</div>
+        <div class="pill" onclick="setCat('beginner',this)">🌱 Beginner</div>
+      </div>
+
+      <div class="workout-grid" id="workout-grid"></div>
+      <div class="empty-state" id="empty-workouts" style="display:none">
+        <div>🔍</div>
+        <p>No workouts found. Try a different filter.</p>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="bnav-icon">🏠</span>Home</a>
+    <a href="workouts.html" class="active"><span class="bnav-icon">💪</span>Workouts</a>
+    <a href="exercises.html"><span class="bnav-icon">📚</span>Exercises</a>
+    <a href="progress.html"><span class="bnav-icon">📈</span>Progress</a>
+    <a href="profile.html"><span class="bnav-icon">👤</span>Profile</a>
+  </nav>
+
+  <div id="toast"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let activeCat = 'all';
+
+    function setCat(cat, el) {
+      activeCat = cat;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      filterWorkouts();
+    }
+
+    function diffBadge(d) {
+      const map = { beginner:'badge-green', intermediate:'badge-yellow', advanced:'badge-red' };
+      return `<span class="badge ${map[d]||'badge-blue'}">${d}</span>`;
+    }
+
+    function filterWorkouts() {
+      const q = document.getElementById('workout-search').value.toLowerCase();
+      const dur = document.getElementById('sort-select').value;
+      let list = WORKOUTS.filter(w => {
+        const matchCat = activeCat === 'all' || w.category === activeCat;
+        const matchQ = w.name.toLowerCase().includes(q) || w.description.toLowerCase().includes(q);
+        const matchDur = dur === 'all' || (dur === 'short' && w.duration < 20) || (dur === 'medium' && w.duration >= 20 && w.duration <= 40) || (dur === 'long' && w.duration > 40);
+        return matchCat && matchQ && matchDur;
+      });
+
+      const grid = document.getElementById('workout-grid');
+      const empty = document.getElementById('empty-workouts');
+      if (list.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      grid.innerHTML = list.map(w => `
+        <div class="wcard fade-in" onclick="startWorkout(${w.id})">
+          <div class="wcard-img">${w.icon}<div class="wcard-diff">${diffBadge(w.difficulty)}</div></div>
+          <div class="wcard-body">
+            <div class="wcard-title">${w.name}</div>
+            <div class="wcard-desc">${w.description}</div>
+            <div class="wcard-meta">
+              <span>⏱️ ${w.duration} min</span>
+              <span>🔥 ${w.calories} cal</span>
+              <span>🎯 ${w.exercises.length} exercises</span>
+              <span>🏋️ ${w.equipment}</span>
+            </div>
+            <button class="btn btn-accent" style="width:100%" onclick="event.stopPropagation();startWorkout(${w.id})">▶ Start Workout</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function startWorkout(id) {
+      localStorage.setItem('currentWorkout', id);
+      location.href = 'player.html';
+    }
+
+    // Check URL param
+    const urlCat = new URLSearchParams(location.search).get('cat');
+    if (urlCat) {
+      activeCat = urlCat;
+      document.querySelectorAll('.pill').forEach(p => {
+        if (p.textContent.toLowerCase().includes(urlCat)) p.classList.add('active');
+        else p.classList.remove('active');
+      });
+    }
+    filterWorkouts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout Player — FitAtHome</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { background:var(--bg); }
+    .player-wrap { max-width:600px; margin:0 auto; padding:80px 20px 40px; min-height:100vh; display:flex; flex-direction:column; }
+    .player-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+    .back-btn { width:40px; height:40px; border-radius:50%; background:var(--bg3); color:var(--text); display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .player-title { font-size:18px; font-weight:700; }
+    .player-subtitle { font-size:13px; color:var(--text2); }
+    .overall-progress { margin-bottom:28px; }
+    .overall-progress-bar { height:8px; background:var(--bg3); border-radius:99px; overflow:hidden; margin-top:8px; }
+    .overall-fill { height:100%; background:var(--accent); border-radius:99px; transition:width 0.5s ease; }
+    .exercise-display { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:32px; text-align:center; margin-bottom:24px; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:320px; }
+    .ex-icon { font-size:100px; margin-bottom:20px; filter:drop-shadow(0 0 20px rgba(232,255,71,0.3)); }
+    .ex-name { font-size:26px; font-weight:800; margin-bottom:8px; }
+    .ex-instruction { font-size:15px; color:var(--text2); line-height:1.6; max-width:400px; margin-bottom:20px; }
+    .timer-circle { position:relative; margin:20px auto; }
+    .timer-circle svg { transform:rotate(-90deg); }
+    .timer-bg { fill:none; stroke:var(--bg3); stroke-width:8; }
+    .timer-fill { fill:none; stroke:var(--accent); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+    .timer-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .timer-num { font-size:48px; font-weight:900; line-height:1; }
+    .timer-label { font-size:13px; color:var(--text2); }
+    .reps-display { font-size:56px; font-weight:900; color:var(--accent); }
+    .reps-label { font-size:16px; color:var(--text2); margin-top:4px; }
+    .next-preview { background:var(--bg3); border-radius:var(--radius-sm); padding:14px 18px; display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+    .next-label { font-size:12px; color:var(--text2); }
+    .next-name { font-size:14px; font-weight:600; }
+    .player-controls { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:24px; }
+    .ctrl-btn { width:52px; height:52px; border-radius:50%; background:var(--bg3); color:var(--text); display:flex; align-items:center; justify-content:center; font-size:20px; transition:all var(--transition); }
+    .ctrl-btn:hover { background:var(--border); }
+    .play-btn { width:72px; height:72px; font-size:28px; background:var(--accent); color:#000; }
+    .play-btn:hover { background:#d4e800; transform:scale(1.05); }
+    .skip-btn { font-size:15px; background:transparent; border:1px solid var(--border); color:var(--text2); padding:8px 20px; border-radius:99px; transition:all var(--transition); }
+    .skip-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .rest-screen { background:var(--card); border:1px solid rgba(0,212,170,0.3); border-radius:var(--radius); padding:32px; text-align:center; display:none; }
+    .rest-screen.show { display:flex; flex-direction:column; align-items:center; }
+    .rest-icon { font-size:64px; margin-bottom:16px; }
+    .rest-timer { font-size:72px; font-weight:900; color:var(--accent3); }
+    /* COMPLETION SCREEN */
+    .complete-screen { display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:80vh; padding:40px 20px; }
+    .complete-screen.show { display:flex; }
+    .complete-icon { font-size:80px; animation:pulse 1s 3; margin-bottom:24px; }
+    .complete-title { font-size:36px; font-weight:900; margin-bottom:8px; }
+    .complete-sub { color:var(--text2); margin-bottom:32px; font-size:16px; }
+    .complete-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; width:100%; max-width:400px; margin-bottom:32px; }
+    .complete-stat { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; }
+    .complete-stat-val { font-size:28px; font-weight:800; color:var(--accent); }
+    .complete-stat-label { font-size:12px; color:var(--text2); margin-top:4px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-logo">F</div><span>FitAtHome</span></div>
+    <div class="nav-actions">
+      <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    </div>
+  </nav>
+
+  <!-- MAIN PLAYER -->
+  <div class="player-wrap" id="player-screen">
+    <div class="player-header">
+      <a href="workouts.html" class="back-btn">←</a>
+      <div>
+        <div class="player-title" id="player-workout-name">Loading...</div>
+        <div class="player-subtitle" id="player-progress-text">Exercise 1 of 8</div>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2)">
+        <span>Overall Progress</span><span id="overall-pct">0%</span>
+      </div>
+      <div class="overall-progress-bar"><div class="overall-fill" id="overall-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- REST SCREEN -->
+    <div class="rest-screen" id="rest-screen">
+      <div class="rest-icon">😮‍💨</div>
+      <h3 style="margin-bottom:8px">Rest Time</h3>
+      <p style="color:var(--text2);margin-bottom:20px">Catch your breath!</p>
+      <div class="rest-timer" id="rest-timer">15</div>
+      <button class="btn btn-accent" style="margin-top:20px" onclick="skipRest()">Skip Rest →</button>
+    </div>
+
+    <!-- EXERCISE DISPLAY -->
+    <div class="exercise-display" id="exercise-display">
+      <div class="ex-icon" id="ex-icon">🏋️</div>
+      <div class="ex-name" id="ex-name">Exercise Name</div>
+      <div class="ex-instruction" id="ex-instruction">Get ready...</div>
+
+      <!-- TIMER (for timed exercises) -->
+      <div id="timer-wrap">
+        <div class="timer-circle">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle class="timer-bg" cx="70" cy="70" r="60"/>
+            <circle class="timer-fill" id="timer-circle" cx="70" cy="70" r="60" stroke-dasharray="377" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-text">
+            <div class="timer-num" id="timer-display">30</div>
+            <div class="timer-label">seconds</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPS (for rep-based exercises) -->
+      <div id="reps-wrap" style="display:none">
+        <div class="reps-display" id="reps-display">12</div>
+        <div class="reps-label">repetitions</div>
+        <button class="btn btn-accent btn-lg" style="margin-top:20px" onclick="completeReps()">✓ Done</button>
+      </div>
+    </div>
+
+    <!-- NEXT EXERCISE PREVIEW -->
+    <div class="next-preview" id="next-preview">
+      <div style="font-size:28px" id="next-icon">🔜</div>
+      <div>
+        <div class="next-label">Next up</div>
+        <div class="next-name" id="next-name">—</div>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="player-controls">
+      <button class="ctrl-btn" onclick="prevExercise()" title="Previous">⏮</button>
+      <button class="ctrl-btn play-btn" id="play-pause-btn" onclick="togglePause()">⏸</button>
+      <button class="ctrl-btn" onclick="nextExercise()" title="Next">⏭</button>
+    </div>
+    <div style="text-align:center">
+      <button class="skip-btn" onclick="nextExercise()">Skip this exercise →</button>
+    </div>
+  </div>
+
+  <!-- COMPLETION SCREEN -->
+  <div class="complete-screen" id="complete-screen">
+    <div class="complete-icon">🎉</div>
+    <div class="complete-title">Workout Complete!</div>
+    <div class="complete-sub">Amazing work. You crushed it!</div>
+    <div class="complete-stats">
+      <div class="complete-stat"><div class="complete-stat-val" id="done-duration">0</div><div class="complete-stat-label">Minutes</div></div>
+      <div class="complete-stat"><div class="complete-stat-val" id="done-exercises">0</div><div class="complete-stat-label">Exercises</div></div>
+      <div class="complete-stat"><div class="complete-stat-val" id="done-calories">0</div><div class="complete-stat-label">Calories</div></div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <a href="dashboard.html" class="btn btn-accent btn-lg">Back to Dashboard</a>
+      <a href="workouts.html" class="btn btn-outline btn-lg">Another Workout</a>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const workoutId = parseInt(localStorage.getItem('currentWorkout') || '0');
+    const workout = WORKOUTS.find(w => w.id === workoutId) || WORKOUTS[0];
+    let currentIdx = 0;
+    let isPaused = false;
+    let timer = null;
+    let timeLeft = 0;
+    let restTimer = null;
+    const REST_TIME = 15;
+    const circumference = 377;
+
+    document.getElementById('player-workout-name').textContent = workout.name;
+
+    function loadExercise(idx) {
+      if (idx >= workout.exercises.length) { showComplete(); return; }
+      const ex = workout.exercises[idx];
+      currentIdx = idx;
+      isPaused = false;
+      clearInterval(timer);
+      clearInterval(restTimer);
+      document.getElementById('rest-screen').classList.remove('show');
+      document.getElementById('exercise-display').style.display = 'flex';
+
+      document.getElementById('ex-icon').textContent = ex.icon || '💪';
+      document.getElementById('ex-name').textContent = ex.name;
+      document.getElementById('ex-instruction').textContent = ex.instruction;
+      document.getElementById('player-progress-text').textContent = `Exercise ${idx + 1} of ${workout.exercises.length}`;
+      document.getElementById('play-pause-btn').textContent = '⏸';
+
+      const pct = Math.round((idx / workout.exercises.length) * 100);
+      document.getElementById('overall-fill').style.width = pct + '%';
+      document.getElementById('overall-pct').textContent = pct + '%';
+
+      // Next exercise
+      if (idx + 1 < workout.exercises.length) {
+        const next = workout.exercises[idx + 1];
+        document.getElementById('next-icon').textContent = next.icon || '🔜';
+        document.getElementById('next-name').textContent = next.name;
+        document.getElementById('next-preview').style.opacity = '1';
+      } else {
+        document.getElementById('next-name').textContent = 'Last exercise!';
+      }
+
+      if (ex.type === 'timed') {
+        document.getElementById('timer-wrap').style.display = 'block';
+        document.getElementById('reps-wrap').style.display = 'none';
+        timeLeft = ex.duration || 30;
+        document.getElementById('timer-display').textContent = timeLeft;
+        updateCircle(timeLeft, ex.duration || 30);
+        startTimer(ex.duration || 30);
+      } else {
+        document.getElementById('timer-wrap').style.display = 'none';
+        document.getElementById('reps-wrap').style.display = 'block';
+        document.getElementById('reps-display').textContent = ex.reps || 12;
+      }
+    }
+
+    function startTimer(total) {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        if (isPaused) return;
+        timeLeft--;
+        document.getElementById('timer-display').textContent = timeLeft;
+        updateCircle(timeLeft, total);
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          showRest();
+        }
+      }, 1000);
+    }
+
+    function updateCircle(current, total) {
+      const offset = circumference * (1 - current / total);
+      document.getElementById('timer-circle').style.strokeDashoffset = offset;
+    }
+
+    function showRest() {
+      document.getElementById('exercise-display').style.display = 'none';
+      const rs = document.getElementById('rest-screen');
+      rs.classList.add('show');
+      let r = REST_TIME;
+      document.getElementById('rest-timer').textContent = r;
+      restTimer = setInterval(() => {
+        r--;
+        document.getElementById('rest-timer').textContent = r;
+        if (r <= 0) { clearInterval(restTimer); skipRest(); }
+      }, 1000);
+    }
+
+    function skipRest() {
+      clearInterval(restTimer);
+      document.getElementById('rest-screen').classList.remove('show');
+      document.getElementById('exercise-display').style.display = 'flex';
+      nextExercise();
+    }
+
+    function completeReps() { showRest(); }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      document.getElementById('play-pause-btn').textContent = isPaused ? '▶' : '⏸';
+    }
+
+    function nextExercise() {
+      clearInterval(timer); clearInterval(restTimer);
+      document.getElementById('rest-screen').classList.remove('show');
+      loadExercise(currentIdx + 1);
+    }
+
+    function prevExercise() {
+      if (currentIdx > 0) { clearInterval(timer); clearInterval(restTimer); loadExercise(currentIdx - 1); }
+    }
+
+    function showComplete() {
+      clearInterval(timer); clearInterval(restTimer);
+      document.getElementById('player-screen').style.display = 'none';
+      document.getElementById('complete-screen').classList.add('show');
+      document.getElementById('done-duration').textContent = workout.duration;
+      document.getElementById('done-exercises').textContent = workout.exercises.length;
+      document.getElementById('done-calories').textContent = workout.calories;
+      // Save to history
+      const app = getAppData();
+      app.stats.totalWorkouts++;
+      app.stats.totalMinutes += workout.duration;
+      app.stats.totalCalories += workout.calories;
+      app.stats.streak++;
+      const today = new Date().getDay();
+      app.weekActivity[today] = true;
+      app.history.unshift({ name: workout.name, icon: workout.icon, duration: workout.duration, calories: workout.calories, date: new Date().toLocaleDateString() });
+      if (app.history.length > 50) app.history.pop();
+      checkAchievements(app);
+      saveAppData(app);
+      showToast('🎉 Workout saved!');
+    }
+
+    loadExercise(0);
+  </script>
+</body>
+</html>

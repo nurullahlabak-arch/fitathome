@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build My Workout — FitAtHome</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .gen-wrap { max-width:680px; margin:0 auto; padding:80px 20px 40px; }
+    .step-indicator { display:flex; gap:8px; margin-bottom:32px; align-items:center; }
+    .step-dot { width:32px; height:32px; border-radius:50%; background:var(--bg3); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; transition:all var(--transition); flex-shrink:0; }
+    .step-dot.active { background:var(--accent); color:#000; border-color:var(--accent); }
+    .step-dot.done { background:var(--green); color:#fff; border-color:var(--green); }
+    .step-line { flex:1; height:2px; background:var(--border); border-radius:99px; }
+    .step-line.done { background:var(--green); }
+    .step-panel { display:none; animation:fadeIn 0.3s ease; }
+    .step-panel.active { display:block; }
+    .step-title { font-size:24px; font-weight:800; margin-bottom:8px; }
+    .step-sub { color:var(--text2); margin-bottom:28px; }
+    .option-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-bottom:28px; }
+    .option-card { background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:20px 16px; text-align:center; cursor:pointer; transition:all var(--transition); }
+    .option-card:hover { border-color:var(--accent); }
+    .option-card.selected { border-color:var(--accent); background:rgba(232,255,71,0.08); }
+    .option-icon { font-size:32px; margin-bottom:8px; }
+    .option-label { font-size:14px; font-weight:700; }
+    .option-desc { font-size:12px; color:var(--text2); margin-top:4px; }
+    .step-nav { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+    /* RESULT */
+    .result-panel { display:none; }
+    .result-panel.show { display:block; animation:fadeIn 0.4s ease; }
+    .result-header { background:linear-gradient(135deg,rgba(232,255,71,0.1),rgba(255,107,53,0.1)); border:1px solid rgba(232,255,71,0.2); border-radius:var(--radius); padding:28px; margin-bottom:24px; }
+    .result-ex-list { display:flex; flex-direction:column; gap:10px; }
+    .result-ex { display:flex; align-items:center; gap:14px; padding:14px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); }
+    .result-ex-num { width:28px; height:28px; border-radius:50%; background:var(--accent); color:#000; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-logo">F</div><span>FitAtHome</span></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="workouts.html">Workouts</a>
+      <a href="exercises.html">Exercises</a><a href="progress.html">Progress</a><a href="profile.html">Profile</a>
+    </div>
+    <div class="nav-actions"><button class="theme-btn" onclick="toggleTheme()">🌙</button></div>
+  </nav>
+
+  <div class="gen-wrap">
+    <div class="page-title">Build My Workout 🎯</div>
+    <div class="page-sub">Answer 5 quick questions and we'll build your perfect workout</div>
+
+    <!-- STEP INDICATOR -->
+    <div class="step-indicator">
+      <div class="step-dot active" id="sd1">1</div><div class="step-line" id="sl1"></div>
+      <div class="step-dot" id="sd2">2</div><div class="step-line" id="sl2"></div>
+      <div class="step-dot" id="sd3">3</div><div class="step-line" id="sl3"></div>
+      <div class="step-dot" id="sd4">4</div><div class="step-line" id="sl4"></div>
+      <div class="step-dot" id="sd5">5</div>
+    </div>
+
+    <!-- STEP 1: LEVEL -->
+    <div class="step-panel active" id="step1">
+      <div class="step-title">What's your fitness level?</div>
+      <div class="step-sub">Be honest — we'll match the right intensity for you</div>
+      <div class="option-grid">
+        <div class="option-card" onclick="select(this,'level','beginner')"><div class="option-icon">🌱</div><div class="option-label">Beginner</div><div class="option-desc">New to exercise</div></div>
+        <div class="option-card" onclick="select(this,'level','intermediate')"><div class="option-icon">💪</div><div class="option-label">Intermediate</div><div class="option-desc">Workout occasionally</div></div>
+        <div class="option-card" onclick="select(this,'level','advanced')"><div class="option-icon">🏆</div><div class="option-label">Advanced</div><div class="option-desc">Train regularly</div></div>
+      </div>
+      <div class="step-nav"><div></div><button class="btn btn-accent" onclick="nextStep(2)">Next →</button></div>
+    </div>
+
+    <!-- STEP 2: GOAL -->
+    <div class="step-panel" id="step2">
+      <div class="step-title">What's your main goal?</div>
+      <div class="step-sub">We'll tailor the workout type to your target</div>
+      <div class="option-grid">
+        <div class="option-card" onclick="select(this,'goal','weight')"><div class="option-icon">🔥</div><div class="option-label">Lose Weight</div><div class="option-desc">Burn fat fast</div></div>
+        <div class="option-card" onclick="select(this,'goal','muscle')"><div class="option-icon">💪</div><div class="option-label">Build Muscle</div><div class="option-desc">Get stronger</div></div>
+        <div class="option-card" onclick="select(this,'goal','fitness')"><div class="option-icon">❤️</div><div class="option-label">Get Fitter</div><div class="option-desc">Improve cardio</div></div>
+        <div class="option-card" onclick="select(this,'goal','flex')"><div class="option-icon">🧘</div><div class="option-label">Flexibility</div><div class="option-desc">Stretch & mobility</div></div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(1)">← Back</button><button class="btn btn-accent" onclick="nextStep(3)">Next →</button></div>
+    </div>
+
+    <!-- STEP 3: TIME -->
+    <div class="step-panel" id="step3">
+      <div class="step-title">How much time do you have?</div>
+      <div class="step-sub">We'll create a workout that fits your schedule</div>
+      <div class="option-grid">
+        <div class="option-card" onclick="select(this,'time','10')"><div class="option-icon">⚡</div><div class="option-label">10 minutes</div><div class="option-desc">Quick blast</div></div>
+        <div class="option-card" onclick="select(this,'time','20')"><div class="option-icon">🕐</div><div class="option-label">20 minutes</div><div class="option-desc">Short session</div></div>
+        <div class="option-card" onclick="select(this,'time','30')"><div class="option-icon">🕧</div><div class="option-label">30 minutes</div><div class="option-desc">Standard session</div></div>
+        <div class="option-card" onclick="select(this,'time','45')"><div class="option-icon">🕐</div><div class="option-label">45 minutes</div><div class="option-desc">Full workout</div></div>
+        <div class="option-card" onclick="select(this,'time','60')"><div class="option-icon">💯</div><div class="option-label">60 minutes</div><div class="option-desc">Maximum effort</div></div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(2)">← Back</button><button class="btn btn-accent" onclick="nextStep(4)">Next →</button></div>
+    </div>
+
+    <!-- STEP 4: EQUIPMENT -->
+    <div class="step-panel" id="step4">
+      <div class="step-title">What equipment do you have?</div>
+      <div class="step-sub">We'll only include exercises you can actually do</div>
+      <div class="option-grid">
+        <div class="option-card" onclick="select(this,'equipment','none')"><div class="option-icon">🙌</div><div class="option-label">No Equipment</div><div class="option-desc">Bodyweight only</div></div>
+        <div class="option-card" onclick="select(this,'equipment','dumbbells')"><div class="option-icon">🏋️</div><div class="option-label">Dumbbells</div><div class="option-desc">A pair of weights</div></div>
+        <div class="option-card" onclick="select(this,'equipment','bands')"><div class="option-icon">🎗️</div><div class="option-label">Resistance Bands</div><div class="option-desc">Bands available</div></div>
+        <div class="option-card" onclick="select(this,'equipment','full')"><div class="option-icon">🏠</div><div class="option-label">Full Setup</div><div class="option-desc">All equipment</div></div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(3)">← Back</button><button class="btn btn-accent" onclick="nextStep(5)">Next →</button></div>
+    </div>
+
+    <!-- STEP 5: BODY AREA -->
+    <div class="step-panel" id="step5">
+      <div class="step-title">Target body area?</div>
+      <div class="step-sub">Focus your workout on what matters most to you</div>
+      <div class="option-grid">
+        <div class="option-card" onclick="select(this,'area','fullbody')"><div class="option-icon">🧍</div><div class="option-label">Full Body</div></div>
+        <div class="option-card" onclick="select(this,'area','upper')"><div class="option-icon">💪</div><div class="option-label">Upper Body</div></div>
+        <div class="option-card" onclick="select(this,'area','lower')"><div class="option-icon">🦵</div><div class="option-label">Lower Body</div></div>
+        <div class="option-card" onclick="select(this,'area','core')"><div class="option-icon">🎯</div><div class="option-label">Abs & Core</div></div>
+        <div class="option-card" onclick="select(this,'area','cardio')"><div class="option-icon">🏃</div><div class="option-label">Cardio</div></div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(4)">← Back</button><button class="btn btn-accent" onclick="generateWorkout()">🚀 Generate!</button></div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-panel" id="result-panel">
+      <div class="result-header">
+        <div style="font-size:36px;margin-bottom:12px">🎯</div>
+        <h2 id="result-title" style="margin-bottom:8px"></h2>
+        <p id="result-desc" style="color:var(--text2);margin-bottom:16px"></p>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <span>⏱️ <span id="result-time"></span></span>
+          <span>🔥 <span id="result-cal"></span> cal</span>
+          <span>🎯 <span id="result-excount"></span> exercises</span>
+        </div>
+      </div>
+      <h3 style="margin-bottom:16px">Your Exercises</h3>
+      <div class="result-ex-list" id="result-ex-list"></div>
+      <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
+        <button class="btn btn-accent btn-lg" onclick="startGenerated()">▶ Start Workout</button>
+        <button class="btn btn-ghost" onclick="resetGen()">🔄 Rebuild</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="bnav-icon">🏠</span>Home</a>
+    <a href="workouts.html"><span class="bnav-icon">💪</span>Workouts</a>
+    <a href="exercises.html"><span class="bnav-icon">📚</span>Exercises</a>
+    <a href="progress.html"><span class="bnav-icon">📈</span>Progress</a>
+    <a href="profile.html"><span class="bnav-icon">👤</span>Profile</a>
+  </nav>
+
+  <div id="toast"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const answers = { level:'', goal:'', time:'', equipment:'', area:'' };
+    let currentStep = 1;
+
+    function select(el, key, val) {
+      el.closest('.option-grid').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      answers[key] = val;
+    }
+
+    function nextStep(n) {
+      const keys = ['level','goal','time','equipment','area'];
+      const key = keys[currentStep - 1];
+      if (!answers[key]) { showToast('Please select an option first'); return; }
+      document.getElementById('step' + currentStep).classList.remove('active');
+      document.getElementById('sd' + currentStep).classList.remove('active');
+      document.getElementById('sd' + currentStep).classList.add('done');
+      document.getElementById('sd' + currentStep).textContent = '✓';
+      if (currentStep < 5) document.getElementById('sl' + currentStep).classList.add('done');
+      currentStep = n;
+      document.getElementById('step' + n).classList.add('active');
+      document.getElementById('sd' + n).classList.add('active');
+    }
+
+    function prevStep(n) {
+      document.getElementById('step' + currentStep).classList.remove('active');
+      document.getElementById('sd' + currentStep).classList.remove('active','done');
+      document.getElementById('sd' + currentStep).textContent = currentStep;
+      currentStep = n;
+      document.getElementById('step' + n).classList.add('active');
+      document.getElementById('sd' + n).classList.remove('done');
+      document.getElementById('sd' + n).classList.add('active');
+      document.getElementById('sd' + n).textContent = n;
+      if (n < 5) document.getElementById('sl' + n).classList.remove('done');
+    }
+
+    function generateWorkout() {
+      if (!answers.area) { showToast('Please select a target area'); return; }
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const time = parseInt(answers.time);
+      const exCount = time <= 10 ? 4 : time <= 20 ? 6 : time <= 30 ? 8 : time <= 45 ? 10 : 12;
+      let pool = EXERCISES.filter(e => {
+        const areaMatch = answers.area === 'fullbody' || e.area === answers.area || e.area === 'fullbody';
+        const equipMatch = answers.equipment === 'full' || e.equipment === 'none' || e.equipment === answers.equipment;
+        const levelMatch = e.difficulty === answers.level || answers.level === 'advanced';
+        return areaMatch && equipMatch && levelMatch;
+      });
+      if (pool.length < exCount) pool = EXERCISES.filter(e => e.equipment === 'none' || e.equipment === answers.equipment);
+      const selected = pool.sort(() => 0.5 - Math.random()).slice(0, exCount);
+      const cal = Math.round(time * 7);
+      document.getElementById('result-title').textContent = `Your ${time}-Min ${answers.area === 'fullbody' ? 'Full Body' : answers.area.charAt(0).toUpperCase()+answers.area.slice(1)} Workout`;
+      document.getElementById('result-desc').textContent = `${answers.level} · ${answers.goal} · ${answers.equipment === 'none' ? 'No equipment' : answers.equipment}`;
+      document.getElementById('result-time').textContent = time + ' min';
+      document.getElementById('result-cal').textContent = cal;
+      document.getElementById('result-excount').textContent = selected.length;
+      document.getElementById('result-ex-list').innerHTML = selected.map((e, i) => `
+        <div class="result-ex">
+          <div class="result-ex-num">${i + 1}</div>
+          <div style="font-size:24px">${e.icon}</div>
+          <div style="flex:1"><div style="font-weight:600">${e.name}</div><div style="font-size:12px;color:var(--text2)">${e.reps} · ${e.muscle}</div></div>
+          <span class="badge badge-green">${e.difficulty}</span>
+        </div>
+      `).join('');
+      localStorage.setItem('generatedWorkout', JSON.stringify({ name: `Custom ${time}-Min Workout`, duration: time, calories: cal, exercises: selected.map(e => ({ name: e.name, icon: e.icon, instruction: e.instructions, type: 'timed', duration: 30, reps: 12 })) }));
+      document.getElementById('result-panel').classList.add('show');
+    }
+
+    function startGenerated() {
+      localStorage.setItem('currentWorkout', 'generated');
+      location.href = 'player.html';
+    }
+
+    function resetGen() {
+      document.getElementById('result-panel').classList.remove('show');
+      currentStep = 1;
+      Object.keys(answers).forEach(k => answers[k] = '');
+      document.querySelectorAll('.step-dot').forEach((d, i) => { d.className = 'step-dot'; d.textContent = i + 1; });
+      document.querySelectorAll('.step-line').forEach(l => l.classList.remove('done'));
+      document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('step1').classList.add('active');
+      document.getElementById('sd1').classList.add('active');
+    }
+  </script>
+</body>
+</html>

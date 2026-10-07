@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — FitAtHome</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .welcome-banner { background: linear-gradient(135deg, rgba(232,255,71,0.12), rgba(255,107,53,0.08)); border: 1px solid rgba(232,255,71,0.2); border-radius: var(--radius); padding: 28px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; }
+    .welcome-text h2 { font-size: 26px; font-weight: 800; }
+    .welcome-text p { color: var(--text2); margin-top: 6px; }
+    .streak-badge { display: flex; align-items: center; gap: 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 24px; }
+    .streak-num { font-size: 40px; font-weight: 900; color: var(--accent); line-height: 1; }
+    .streak-label { font-size: 13px; color: var(--text2); }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .today-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 32px; }
+    .today-workout { display: flex; align-items: center; gap: 20px; padding: 20px; background: var(--bg3); border-radius: var(--radius-sm); margin-top: 16px; }
+    .today-icon { font-size: 48px; flex-shrink: 0; }
+    .today-info { flex: 1; }
+    .today-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .today-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+    .today-meta span { font-size: 13px; color: var(--text2); }
+    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .week-day { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .week-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid transparent; transition: all var(--transition); }
+    .week-dot.done { background: var(--accent); color: #000; font-weight: 700; border-color: var(--accent); }
+    .week-dot.today { border-color: var(--accent); }
+    .week-label { font-size: 11px; color: var(--text3); }
+    .recent-list { display: flex; flex-direction: column; gap: 10px; }
+    .recent-item { display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: var(--bg3); border-radius: var(--radius-sm); }
+    .recent-icon { font-size: 28px; flex-shrink: 0; }
+    .recent-info { flex: 1; }
+    .recent-name { font-size: 14px; font-weight: 600; }
+    .recent-date { font-size: 12px; color: var(--text2); }
+    .recent-stats { text-align: right; font-size: 12px; color: var(--text2); }
+    @media(max-width:768px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .week-dot { width: 28px; height: 28px; font-size: 12px; } }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">F</div>
+      <span>FitAtHome</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="workouts.html">Workouts</a>
+      <a href="exercises.html">Exercises</a>
+      <a href="progress.html">Progress</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container section-sm">
+
+      <!-- WELCOME BANNER -->
+      <div class="welcome-banner fade-in">
+        <div class="welcome-text">
+          <h2 id="welcome-msg">Good morning! 👋</h2>
+          <p id="welcome-sub">Ready to crush today's workout?</p>
+        </div>
+        <div class="streak-badge">
+          <div>
+            <div class="streak-num" id="streak-display">0</div>
+            <div class="streak-label">Day Streak 🔥</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS CARDS -->
+      <div class="stats-grid fade-in">
+        <div class="stat-card">
+          <div class="stat-icon">💪</div>
+          <div class="stat-label">Total Workouts</div>
+          <div class="stat-value" id="dash-total">0</div>
+          <div class="stat-sub">all time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-label">Total Minutes</div>
+          <div class="stat-value" id="dash-minutes">0</div>
+          <div class="stat-sub">all time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-label">Calories Burned</div>
+          <div class="stat-value" id="dash-calories">0</div>
+          <div class="stat-sub">all time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-label">Achievements</div>
+          <div class="stat-value" id="dash-achievements">0</div>
+          <div class="stat-sub">unlocked</div>
+        </div>
+      </div>
+
+      <!-- TODAY'S WORKOUT -->
+      <div class="today-card fade-in">
+        <div class="section-header">
+          <h3>Today's Workout</h3>
+          <span class="badge badge-accent" id="fitness-level-badge">Beginner</span>
+        </div>
+        <div class="today-workout">
+          <div class="today-icon">🏃</div>
+          <div class="today-info">
+            <div class="today-title" id="today-workout-name">Full Body Blast</div>
+            <div class="today-meta">
+              <span>⏱️ <span id="today-duration">25 min</span></span>
+              <span>🔥 <span id="today-calories">220 cal</span></span>
+              <span>🎯 <span id="today-exercises">8 exercises</span></span>
+            </div>
+            <div class="progress-bar" style="margin-top:12px;max-width:300px">
+              <div class="progress-fill" id="today-progress" style="width:0%"></div>
+            </div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px" id="today-progress-label">Not started</div>
+          </div>
+          <a href="player.html" class="btn btn-accent">▶ Start</a>
+        </div>
+      </div>
+
+      <!-- WEEKLY PROGRESS -->
+      <div class="card fade-in" style="margin-bottom:32px">
+        <div class="section-header">
+          <h3>This Week</h3>
+          <span id="week-count" style="font-size:13px;color:var(--text2)">0 / 7 days</span>
+        </div>
+        <div class="week-grid" id="week-grid"></div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="card fade-in" style="margin-bottom:32px">
+        <h3 style="margin-bottom:16px">Quick Actions</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a href="player.html" class="btn btn-accent">🚀 Start Workout</a>
+          <a href="generator.html" class="btn btn-ghost">🎯 Build My Workout</a>
+          <a href="plans.html" class="btn btn-ghost">📋 View Plans</a>
+          <a href="exercises.html" class="btn btn-ghost">📚 Exercise Library</a>
+        </div>
+      </div>
+
+      <!-- RECENT WORKOUTS -->
+      <div class="card fade-in">
+        <div class="section-header">
+          <h3>Recent Workouts</h3>
+          <a href="progress.html" class="btn btn-ghost btn-sm">View All</a>
+        </div>
+        <div class="recent-list" id="recent-list">
+          <div style="text-align:center;padding:32px;color:var(--text3)">
+            <div style="font-size:40px;margin-bottom:8px">🏋️</div>
+            <div>No workouts yet. <a href="player.html" style="color:var(--accent)">Start your first one!</a></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="bnav-icon">🏠</span>Home</a>
+    <a href="workouts.html"><span class="bnav-icon">💪</span>Workouts</a>
+    <a href="exercises.html"><span class="bnav-icon">📚</span>Exercises</a>
+    <a href="progress.html"><span class="bnav-icon">📈</span>Progress</a>
+    <a href="profile.html"><span class="bnav-icon">👤</span>Profile</a>
+  </nav>
+
+  <div id="toast"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    function initDashboard() {
+      const data = getAppData();
+      const hour = new Date().getHours();
+      const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      const name = data.profile.name || 'Athlete';
+      document.getElementById('welcome-msg').textContent = `${greet}, ${name}! 👋`;
+      document.getElementById('streak-display').textContent = data.stats.streak;
+      document.getElementById('dash-total').textContent = data.stats.totalWorkouts;
+      document.getElementById('dash-minutes').textContent = data.stats.totalMinutes;
+      document.getElementById('dash-calories').textContent = data.stats.totalCalories;
+      document.getElementById('dash-achievements').textContent = data.achievements.filter(a => a.unlocked).length;
+      document.getElementById('fitness-level-badge').textContent = data.profile.level || 'Beginner';
+
+      // Today's workout - pick from data
+      const todayW = WORKOUTS[0];
+      document.getElementById('today-workout-name').textContent = todayW.name;
+      document.getElementById('today-duration').textContent = todayW.duration + ' min';
+      document.getElementById('today-calories').textContent = todayW.calories + ' cal';
+      document.getElementById('today-exercises').textContent = todayW.exercises.length + ' exercises';
+
+      // Week grid
+      const days = ['S','M','T','W','T','F','S'];
+      const today = new Date().getDay();
+      const grid = document.getElementById('week-grid');
+      let doneCount = 0;
+      days.forEach((d, i) => {
+        const done = data.weekActivity[i] || false;
+        if (done) doneCount++;
+        const col = document.createElement('div');
+        col.className = 'week-day';
+        col.innerHTML = `<div class="week-dot ${done ? 'done' : ''} ${i === today ? 'today' : ''}">${done ? '✓' : d}</div><div class="week-label">${d}</div>`;
+        grid.appendChild(col);
+      });
+      document.getElementById('week-count').textContent = `${doneCount} / 7 days`;
+
+      // Recent workouts
+      const recent = data.history.slice(0, 5);
+      if (recent.length > 0) {
+        const list = document.getElementById('recent-list');
+        list.innerHTML = recent.map(h => `
+          <div class="recent-item">
+            <div class="recent-icon">${h.icon || '💪'}</div>
+            <div class="recent-info">
+              <div class="recent-name">${h.name}</div>
+              <div class="recent-date">${h.date}</div>
+            </div>
+            <div class="recent-stats">${h.duration} min<br>${h.calories} cal</div>
+          </div>
+        `).join('');
+      }
+    }
+    initDashboard();
+  </script>
+</body>
+</html>
